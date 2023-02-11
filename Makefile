@@ -4,7 +4,7 @@
 #
 # Still depend on a kernel source tree.
 #
-TARGETS := xdp_ttl
+TARGETS := xdp_dnat tc_snat
 
 TOOLS_PATH = tools
 
@@ -46,8 +46,8 @@ CFLAGS := -g -O2 -Wall
 
 # Local copy of include/linux/bpf.h kept under ./kernel-usr-include
 #
-CFLAGS += -I./kernel-usr-include/
-##CFLAGS += -I$(KERNEL)/usr/include
+#CFLAGS += -I./kernel-usr-include/
+CFLAGS += -I$(KERNEL)/usr/include
 #
 # Interacting with libbpf
 CFLAGS += -I$(TOOLS_PATH)/lib
@@ -73,7 +73,7 @@ NOSTDINC_FLAGS := -nostdinc -isystem $(shell $(CC) -print-file-name=include)
 #
 # bpf_helper.h need newer version of uapi/linux/bpf.h
 # (as this git-repo use new devel kernel features)
-LINUXINCLUDE := -I./kernel/include
+#LINUXINCLUDE := -I./kernel/include
 #
 LINUXINCLUDE += -I$(KERNEL)/arch/$(ARCH)/include
 LINUXINCLUDE += -I$(KERNEL)/arch/$(ARCH)/include/generated/uapi
@@ -89,6 +89,10 @@ LINUXINCLUDE += -I./helpers
 EXTRA_CFLAGS =
 
 all: dependencies $(TARGETS_ALL) $(KERN_OBJECTS) $(CMDLINE_TOOLS)
+
+kern: dependencies $(KERN_OBJECTS)
+
+user: dependencies $(TARGETS_ALL) $(CMDLINE_TOOLS)
 
 .PHONY: dependencies clean verify_cmds verify_llvm_target_bpf $(CLANG) $(LLC)
 
