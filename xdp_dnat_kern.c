@@ -94,14 +94,15 @@ process_tcp(struct Packet *packet) {
     struct iphdr *iph = packet->ip;
     struct tcphdr *tcph = packet->tcp;
 
-    if (bpf_ntohs(tcph->dest) == 22) {
+    if (bpf_ntohs(tcph->source) == 22) {
         return XDP_PASS;
     }
-
-    bpf_debug("[xdp dnat] TCP(sport=%d dport=%d)", bpf_ntohs(tcph->source), bpf_ntohs(tcph->dest));
-
-    if (bpf_ntohs(tcph->dest) == 80) {
+    bpf_debug("[xdp dnat] IP(iph->saddr=%pI4 iph->daddr=%pI4 iph->protocol=%d)", &iph->saddr, &iph->daddr, iph->protocol);
+    bpf_debug("[xdp dnat] TCP(tcph->source=%d tcph->dest=%d)", bpf_ntohs(tcph->source), bpf_ntohs(tcph->dest));
+    if (bpf_ntohs(tcph->source) == 6000) {
         bpf_debug("[xdp dnat] -->INBOUND");
+        bpf_debug("[xdp dnat] IP(src=%pI4 dst=%pI4 proto=%d)", &iph->saddr, &iph->daddr, iph->protocol);
+        bpf_debug("[xdp dnat] TCP(sport=%d dport=%d)", bpf_ntohs(tcph->source), bpf_ntohs(tcph->dest));
         /* Validate IP header length */
         const __u32 ip_len = iph->ihl * 4;
         if ((void *) iph + ip_len > ctx->data_end) {
@@ -136,8 +137,7 @@ process_tcp(struct Packet *packet) {
         tcp_csum += tcp_len << 8;
 
         tcph->check = 0;
-        tcph->dest = bpf_htons(90);
-
+        tcph->source = bpf_htons(5000);
 
         __u16 *buf = (void *) tcph;
 
@@ -179,8 +179,6 @@ process_ip(struct Packet *packet) {
     if (ip->protocol != IPPROTO_TCP) {
         return XDP_PASS;
     }
-
-    bpf_debug("[xdp dnat] IP(src=%pI4 dst=%pI4 proto=%d)", &ip->saddr, &ip->daddr, ip->protocol);
 
     /* TODO: check if client has passed SYN cookie challenge */
 

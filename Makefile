@@ -4,7 +4,7 @@
 #
 # Still depend on a kernel source tree.
 #
-TARGETS := xdp_dnat tc_snat
+TARGETS := xdp_dnat tc_snat tc_dnat
 
 TOOLS_PATH = tools
 

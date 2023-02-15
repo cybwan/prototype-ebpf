@@ -1,4 +1,4 @@
-#define KBUILD_MODNAME "tc_snat"
+#define KBUILD_MODNAME "tc_dnat"
 
 #include <linux/bpf.h>
 
@@ -32,7 +32,7 @@
 #define MAX_CSUM_BYTES (MAX_CSUM_WORDS * 2)
 
 SEC("nat")
-int tc_ingress(struct __sk_buff *skb) {
+int tc_egress(struct __sk_buff *skb) {
     void *data = (void *) (long) skb->data;
     void *data_end = (void *) (long) skb->data_end;
     struct ethhdr *eth = (struct ethhdr *) data;
@@ -58,10 +58,10 @@ int tc_ingress(struct __sk_buff *skb) {
         return TC_ACT_SHOT; /* malformed packet */
     }
 
-    if (bpf_ntohs(tcph->source) == 15003) {
-        bpf_debug("[SIDECAR.OTBOUND]->[NODE.IGS]");
-        bpf_debug("[SIDECAR.OTBOUND]->[NODE.IGS] IP(src ip=%pI4 dst ip=%pI4 proto=%d)", &iph->saddr, &iph->daddr, iph->protocol);
-        bpf_debug("[SIDECAR.OTBOUND]->[NODE.IGS] TCP(src port=%d dst port=%d)", bpf_ntohs(tcph->source), bpf_ntohs(tcph->dest));
+    if (bpf_ntohs(tcph->dest) == 5000) {
+        bpf_debug("[NODE.EGS]->[SIDECAR.INBOUND]");
+        bpf_debug("[NODE.EGS]->[SIDECAR.INBOUND] IP(src ip=%pI4 dst ip=%pI4 proto=%d)", &iph->saddr, &iph->daddr, iph->protocol);
+        bpf_debug("[NODE.EGS]->[SIDECAR.INBOUND] TCP(src port=%d dst port=%d)", bpf_ntohs(tcph->source), bpf_ntohs(tcph->dest));
         /* Validate IP header length */
         const __u32 ip_len = iph->ihl * 4;
         if ((void *) iph + ip_len > data_end) {
@@ -89,9 +89,9 @@ int tc_ingress(struct __sk_buff *skb) {
         __u32 dport_off = ETH_HLEN + sizeof(struct iphdr) + offsetof(struct tcphdr, dest);
         __u16 src_port = tcph->source;
         __u16 dst_port = tcph->dest;
-        __u16 new_port = bpf_htons(5000);
-        bpf_l4_csum_replace(skb, csum_off, src_port, new_port, sizeof(src_port));
-        bpf_skb_store_bytes(skb, sport_off, &new_port, sizeof(new_port), 0);
+        __u16 new_port = bpf_htons(15003);
+        bpf_l4_csum_replace(skb, csum_off, dst_port, new_port, sizeof(dst_port));
+        bpf_skb_store_bytes(skb, dport_off, &new_port, sizeof(new_port), 0);
         return TC_ACT_OK;
     }
 
