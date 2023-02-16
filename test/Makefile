@@ -1,32 +1,50 @@
-BPF_FS ?= /sys/fs/bpf
-NET_DEV ?= ens36
+BPF_FS=/sys/fs/bpf
+PIN_OBJECT_NS_PATH=/sys/fs/bpf
+PIN_GLOBAL_NS_PATH=/sys/fs/bpf/tc/globals
+
+NET_DEV ?= ens33
 
 .PHONY: all clean
 
 all:
 
-.PHONY: $(BPF_FS)
+#.PHONY: $(BPF_FS) $(PIN_GLOBAL_NS_PATH)
 $(BPF_FS):
 	mountpoint -q $@ || mount -t bpf none $@
+
+$(PIN_GLOBAL_NS_PATH): $(BPF_FS)
+	[ -d $@ ] || sudo mkdir -p $@
+
+load-map-acc_map: $(PIN_GLOBAL_NS_PATH)
+	[ -f $(PIN_GLOBAL_NS_PATH)/acc_map ] || sudo bpftool map create $(PIN_GLOBAL_NS_PATH)/acc_map type array key 4 value 4 entries 2 name acc_map
+
+clean-acc_map:
+	[ -f $(PIN_GLOBAL_NS_PATH)/acc_map ] && sudo rm -f $(PIN_GLOBAL_NS_PATH)/acc_map
 
 pull:
 	git pull
 
-dnat:
-	sudo ip link set dev $(NET_DEV) xdp obj ../xdp_dnat_kern.o
-
 test:
-	#sudo ip link set dev $(NET_DEV) xdp obj ../xdp_dnat_kern.o
-	sudo tc qdisc add dev $(NET_DEV) clsact
-	sudo tc filter add dev $(NET_DEV) ingress bpf direct-action obj ../tc_snat_kern.o sec nat
-	sudo tc filter add dev $(NET_DEV) egress bpf direct-action obj ../tc_dnat_kern.o sec nat
+	tc qdisc add dev $(NET_DEV) clsact
+	tc filter add dev $(NET_DEV) ingress bpf da obj ../tc_kern.o sec classifier/ingress
+	tc filter add dev $(NET_DEV) egress  bpf da obj ../tc_kern.o sec classifier/egress
 
-
-cancel:
-	#sudo ip link set dev $(NET_DEV) xdp off
+test-cancel:
 	sudo tc filter delete dev $(NET_DEV) ingress
 	sudo tc filter delete dev $(NET_DEV) egress
 	sudo tc qdisc delete dev $(NET_DEV) clsact
+
+tc-ingress-show:
+	tc filter show dev $(NET_DEV) ingress
+
+tc-egress-show:
+	tc filter show dev $(NET_DEV) egress
+
+map:
+	bpftool map show
+
+prog:
+	bpftool prog show
 
 log:
 	sudo cat /sys/kernel/debug/tracing/trace_pipe|grep bpf_trace_printk
