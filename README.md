@@ -5,3 +5,5 @@
 * https://www.cnxct.com/using-ebpf-tc-to-securely-mangle-packets-in-the-kernel/
 
 * https://rexrock.github.io/post/ebpf2/
+
+* https://cloud.tencent.com/developer/article/1409664
