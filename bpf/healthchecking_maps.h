@@ -1,8 +1,8 @@
 #ifndef __HEALTHCHECKING_MAPS_H
 #define __HEALTHCHECKING_MAPS_H
 
-#include "include/bpf.h"
-#include "include/bpf_helpers.h"
+#include "bpf.h"
+#include "bpf_helpers.h"
 
 #include "balancer_consts.h"
 #include "healthchecking_consts.h"

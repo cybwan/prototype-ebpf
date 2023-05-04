@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "include/bpf.h"
+#include "bpf.h"
 
 #include "balancer_consts.h"
 #include "balancer_helpers.h"

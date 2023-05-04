@@ -5,8 +5,8 @@
 #include <linux/string.h>
 #include <linux/udp.h>
 
-#include "include/bpf.h"
-#include "include/bpf_helpers.h"
+#include "bpf.h"
+#include "bpf_helpers.h"
 
 #include "encap_helpers.h"
 

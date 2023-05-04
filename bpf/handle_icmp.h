@@ -13,8 +13,8 @@
 #include <linux/ipv6.h>
 #include <stddef.h>
 
-#include "include/bpf.h"
-#include "include/bpf_endian.h"
+#include "bpf.h"
+#include "bpf_endian.h"
 
 #include "balancer_consts.h"
 #include "balancer_helpers.h"

@@ -6,8 +6,8 @@
  * involving information pertaining to proper forwarding of packets
  */
 
-#include "include/bpf.h"
-#include "include/bpf_helpers.h"
+#include "bpf.h"
+#include "bpf_helpers.h"
 
 #include "balancer_consts.h"
 #include "balancer_structs.h"

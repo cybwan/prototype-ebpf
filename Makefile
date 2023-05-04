@@ -1,16 +1,9 @@
-obj := .
-src := .
-
 
 DEBUGBPF = -DDEBUG
 DEBUGFLAGS = -O0 -g -Wall
 PFLAGS = $(DEBUGFLAGS)
 
-INCLUDEFLAGS = -I$(obj)/usr/include \
-	       -I$(obj)/include \
-	       -I$(obj)
-
-TARGETS := bpf/balancer bpf/healthchecking
+TARGETS := bpf/balancer bpf/healthchecking bpf/xdp_root bpf/xdp_pktcntr
 
 #always = bpf/balancer_kern.o
 #always += bpf/healthchecking_ipip.o
@@ -26,7 +19,7 @@ USER_SOURCES = ${TARGETS_ALL:=_user.c}
 KERN_OBJECTS = ${KERN_SOURCES:.c=.o}
 USER_OBJECTS = ${USER_SOURCES:.c=.o}
 
-LINUXINCLUDE += -I.
+LINUXINCLUDE += -I./include
 
 NOSTDINC_FLAGS =
 #NOSTDINC_FLAGS := -nostdinc -isystem $(shell $(CC) -print-file-name='include')

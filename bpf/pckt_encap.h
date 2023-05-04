@@ -11,9 +11,9 @@
 #include <linux/ipv6.h>
 #include <string.h>
 
-#include "include/bpf.h"
-#include "include/bpf_endian.h"
-#include "include/bpf_helpers.h"
+#include "bpf.h"
+#include "bpf_endian.h"
+#include "bpf_helpers.h"
 
 #include "balancer_consts.h"
 #include "balancer_helpers.h"

@@ -5,9 +5,9 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "include/bpf.h"
-#include "include/bpf_helpers.h"
-#include "include/jhash.h"
+#include "bpf.h"
+#include "bpf_helpers.h"
+#include "jhash.h"
 
 #include "balancer_consts.h"
 #include "balancer_helpers.h"
