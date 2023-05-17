@@ -6,11 +6,23 @@
  * different sections in elf_bpf file. Section names
  * are interpreted by elf_bpf loader
  */
+#ifndef __section
 #define SEC(NAME) __attribute__((section(NAME), used))
+#endif
 
 #define __uint(name, val) int(*name)[val]
 #define __type(name, val) typeof(val) *name
 #define __array(name, val) typeof(val) *name[]
+
+struct bpf_elf_map {
+    __u32 type;
+    __u32 size_key;
+    __u32 size_value;
+    __u32 max_elem;
+    __u32 flags;
+    __u32 id;
+    __u32 pinning;
+};
 
 /* helper macro to print out debug messages */
 #define bpf_printk(fmt, ...)                                   \
@@ -18,6 +30,20 @@
     char ____fmt[] = fmt;                                      \
     bpf_trace_printk(____fmt, sizeof(____fmt), ##__VA_ARGS__); \
   })
+
+#ifndef DEBUG
+// do nothing
+#define debugf(fmt, ...) ({})
+#else
+// only print traceing in debug mode
+#ifndef debugf
+#define debugf(fmt, ...)                                                       \
+    ({                                                                         \
+        char ____fmt[] = "[debug] " fmt PRINT_SUFFIX;                          \
+        bpf_trace_printk(____fmt, sizeof(____fmt), ##__VA_ARGS__);             \
+    })
+#endif
+#endif
 
 /* helper functions called from eBPF programs written in C */
 static void* (*bpf_map_lookup_elem)(void* map, void* key) = (void*)

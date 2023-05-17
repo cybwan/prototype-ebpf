@@ -12,24 +12,36 @@
 #define CTRL_ARRAY_SIZE 2
 #define CNTRS_ARRAY_SIZE 512
 
-struct {
-  __uint(type, BPF_MAP_TYPE_ARRAY);
-  __type(key, __u32);
-  __type(value, __u32);
-  __uint(max_entries, CTRL_ARRAY_SIZE);
-} ctl_array SEC(".maps");
+// struct {
+//   __uint(type, BPF_MAP_TYPE_ARRAY);
+//   __type(key, __u32);
+//   __type(value, __u32);
+//   __uint(max_entries, CTRL_ARRAY_SIZE);
+// } ctl_array SEC(".maps");
+struct bpf_elf_map SEC("maps") ctl_array = {
+    .type = BPF_MAP_TYPE_ARRAY,
+    .size_key = sizeof(__u32),
+    .size_value = sizeof(__u32),
+    .max_elem = CTRL_ARRAY_SIZE,
+};
 
-struct {
-  __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
-  __type(key, __u32);
-  __type(value, __u64);
-  __uint(max_entries, CNTRS_ARRAY_SIZE);
-} cntrs_array SEC(".maps");
+// struct {
+//   __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
+//   __type(key, __u32);
+//   __type(value, __u64);
+//   __uint(max_entries, CNTRS_ARRAY_SIZE);
+// } cntrs_array SEC(".maps");
+struct bpf_elf_map SEC("maps") cntrs_array = {
+    .type = BPF_MAP_TYPE_PERCPU_ARRAY,
+    .size_key = sizeof(__u32),
+    .size_value = sizeof(__u64),
+    .max_elem = CNTRS_ARRAY_SIZE,
+};
 
 SEC("xdp")
 int pktcntr(struct xdp_md *ctx) {
-  void *data_end = (void *)(long)ctx->data_end;
-  void *data = (void *)(long)ctx->data;
+  // void *data_end = (void *)(long)ctx->data_end;
+  // void *data = (void *)(long)ctx->data;
   __u32 ctl_flag_pos = 0;
   __u32 cntr_pos = 0;
   __u32 *flag = bpf_map_lookup_elem(&ctl_array, &ctl_flag_pos);

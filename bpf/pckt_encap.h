@@ -84,7 +84,7 @@ encap_v4(struct xdp_md *xdp, struct ctl_value *cval,
   __u32 ip_suffix = bpf_htons(pckt->flow.port16[0]);
   ip_suffix <<= 16;
   ip_suffix ^= pckt->flow.src;
-  __u64 csum = 0;
+  //__u64 csum = 0;
   // ipip encap
   if (bpf_xdp_adjust_head(xdp, 0 - (int)sizeof(struct iphdr))) {
     return false;
